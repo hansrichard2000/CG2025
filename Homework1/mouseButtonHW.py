@@ -49,8 +49,8 @@ def drawLine(pt0, pt1, color='GREEN', thick=3):
 def drawPolylines(color='GREEN', thick=3):
     if(count < 2): return
     for i in range(count-1):
-        # drawLine(pts[i], pts[i+1], color)
-        pygame.draw.line(screen, color, pts[i], pts[i+1], thick)
+        drawLine(pts[i], pts[i+1], color)
+        # pygame.draw.line(screen, color, pts[i], pts[i+1], thick)
 
 #Loop until the user clicks the close button.
 done = False
