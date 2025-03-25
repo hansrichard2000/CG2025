@@ -1,97 +1,180 @@
+"""
+Modified on Mar 25 2025
+@author: hansrichard2000@gmail.com
+@attribution: lbg@dongseo.ac.kr
+"""
 import pygame
-from sys import exit
-import numpy as np
-    
+import sys
+
+# Initialize screen size and Pygame setup
 width = 800
 height = 600
 pygame.init()
-screen = pygame.display.set_mode((width, height), 0, 32)
-pygame.display.set_caption("DrawLine HW 2")
-  
-# Define the colors we will use in RGB format
-BLACK = (  0,   0,   0)
+screen = pygame.display.set_mode((width, height))
+pygame.display.set_caption("Line Drawing Method Picker")
+
+# Fonts and colors
+font = pygame.font.SysFont("Arial", 18)
 WHITE = (255, 255, 255)
-BLUE =  (  0,   0, 255)
-GREEN = (  0, 255,   0)
-RED =   (255,   0,   0)
+BLUE = (0, 0, 255)
+GREEN = (0, 255, 0)
+RED = (255, 0, 0)
+GRAY = (200, 200, 200)
+BLACK = (0, 0, 0)
 
-pts = [] 
-knots = []
-count = 0
-#screen.blit(background, (0,0))
+# Global state variables
 screen.fill(WHITE)
+clicks = []              # Stores up to 2 clicked points
+draw_mode = None         # Drawing mode: None, "euclidean", "coordinate-free"
+show_menu = False        # Whether to show the method popup menu
+menu_pos = (0, 0)        # Position of the popup menu
+points_buffer = []       # Buffer to store all clicked points regardless of mode
 
-# https://kite.com/python/docs/pygame.Surface.blit
-clock= pygame.time.Clock()
-
-
-def drawPoint(pt, color='GREEN', thick=3):
-    pygame.draw.circle(screen, color, pt, thick)
-
-#HW2 implement drawLine with drawPoint
-def drawLine(x0, y0, x1, y1, color='GREEN', thick=3):
+def drawPoint(x, y, color=BLUE, thick=5):
     """
-    Draws a line from (x0, y0) to (x1, y1) using the drawPoint function.
-    Uses linear interpolation (DDA-like approach).
+    Draws a filled circle (point) at a given position.
+    :param x: X coordinate
+    :param y: Y coordinate
+    :param color: RGB color tuple
+    :param thick: Radius of the point
+    """
+    pygame.draw.circle(screen, color, (x, y), thick)
+
+def drawLine_euclidean(x0, y0, x1, y1, color=GREEN, thick=3):
+    """
+    Draws a line using Euclidean interpolation.
+    Uses linear interpolation between x0 and x1.
     """
     if x0 == x1:
         if y0 > y1:
             y0, y1 = y1, y0
         for y in range(y0, y1 + 1):
-            x = round(x0 + (x1 - x0) * (y - y0) / (y1 - y0))
             drawPoint(x0, y, color=color, thick=thick)
     else:
         if x0 > x1:
             x0, y0, x1, y1 = x1, y1, x0, y0
-        
         slope = (y1 - y0) / (x1 - x0)
-        
         for x in range(x0, x1 + 1):
-            y = round(y0 + (y1 - y0) * (x - x0) / (x1 - x0))
-            drawPoint(x, round(y), GREEN, thick=thick)
+            y = round(y0 + slope * (x - x0))
+            drawPoint(x, y, color=color, thick=thick)
+    drawPoint(x0, y0, BLUE)
+    drawPoint(x1, y1, BLUE)
 
-#Loop until the user clicks the close button.
-done = False
-pressed = 0
-margin = 6
-old_pressed = 0
-old_button1 = 0
+def drawLine_coord_free(x0, y0, x1, y1, color=GREEN, thick=3):
+    """
+    Draws a line using coordinate-free interpolation (parametric form).
+    :param x0, y0: Start point
+    :param x1, y1: End point
+    """
+    dx = x1 - x0
+    dy = y1 - y0
+    steps = max(abs(dx), abs(dy))
+    for i in range(steps + 1):
+        t = i / steps
+        x = round(x0 + dx * t)
+        y = round(y0 + dy * t)
+        drawPoint(x, y, color=color, thick=thick)
+    drawPoint(x0, y0, BLUE)
+    drawPoint(x1, y1, BLUE)
 
-while not done:   
-    # This limits the while loop to a max of 10 times per second.
-    # Leave this out and we will use all CPU we can.
-    time_passed = clock.tick(30)
+def drawMenu(pos):
+    """
+    Draws a popup menu with drawing mode options.
+    :param pos: Tuple (x, y) of where the menu should be placed
+    """
+    menu_items = ["Euclidean", "Coordinate-Free", "Reset"]
+    menu_width, menu_height = 160, 90
+    pygame.draw.rect(screen, GRAY, (pos[0], pos[1], menu_width, menu_height))
+    pygame.draw.rect(screen, BLACK, (pos[0], pos[1], menu_width, menu_height), 2)
+    for i, item in enumerate(menu_items):
+        text = font.render(item, True, BLACK)
+        screen.blit(text, (pos[0] + 10, pos[1] + 10 + i * 25))
+
+def handleMenuClick(pos):
+    """
+    Handles mouse click selection from the popup menu.
+    Updates draw_mode accordingly or resets the screen.
+    :param pos: Position of mouse click
+    """
+    global draw_mode, show_menu, points_buffer, clicks
+    x, y = menu_pos
+    if x <= pos[0] <= x + 160:
+        if y <= pos[1] <= y + 25:
+            draw_mode = "euclidean"
+        elif y + 25 <= pos[1] <= y + 50:
+            draw_mode = "coordinate-free"
+        elif y + 50 <= pos[1] <= y + 75:
+            draw_mode = None
+            points_buffer = []
+            clicks = []
+            screen.fill(WHITE)
+        show_menu = False  # Ensure menu collapses after selection
+        screen.fill(WHITE)
+        for pt in points_buffer:
+            drawPoint(*pt, BLUE, thick=5)
+
+        # If needed, redraw lines (depending on mode)
+        if draw_mode and len(points_buffer) >= 2:
+            for i in range(0, len(points_buffer) - 1, 2):
+                x0, y0 = points_buffer[i]
+                x1, y1 = points_buffer[i + 1]
+                if draw_mode == "euclidean":
+                    drawLine_euclidean(x0, y0, x1, y1)
+                elif draw_mode == "coordinate-free":
+                    drawLine_coord_free(x0, y0, x1, y1)
+
+        pygame.display.flip()
+    # Draw lines between consecutive points (pairwise only)
+    if draw_mode and len(points_buffer) >= 2:
+        for i in range(0, len(points_buffer) - 1, 2):
+            x0, y0 = points_buffer[i]
+            x1, y1 = points_buffer[i + 1]
+            if draw_mode == "euclidean":
+                drawLine_euclidean(x0, y0, x1, y1)
+            elif draw_mode == "coordinate-free":
+                drawLine_coord_free(x0, y0, x1, y1)
+
+# Main event loop
+pygame.display.flip()
+running = True
+while running:
+    if show_menu:
+        screen.fill(WHITE)
+        for pt in points_buffer:
+            drawPoint(*pt, BLUE, thick=5)
+        drawMenu(menu_pos)
+        pygame.display.flip()
 
     for event in pygame.event.get():
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            pressed = -1            
-        elif event.type == pygame.MOUSEBUTTONUP:
-            pressed = 1            
-        elif event.type == pygame.QUIT:
-            done = True
-        else:
-            pressed = 0
+        if event.type == pygame.QUIT:
+            running = False
 
-    button1, button2, button3 = pygame.mouse.get_pressed()
-    x, y = pygame.mouse.get_pos()
-    pt = [x, y]
-    pygame.draw.circle(screen, RED, pt, 0)
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:  # Left click
+                if show_menu:
+                    handleMenuClick(pygame.mouse.get_pos())
+                    pygame.display.flip()
+                else:
+                    pos = pygame.mouse.get_pos()
+                    drawPoint(*pos, BLUE, thick=5)
+                    points_buffer.append(pos)
+                    pygame.display.flip()
 
-    if old_pressed == -1 and pressed == 1 and old_button1 == 1 and button1 == 0 :
-        pts.append(pt) 
-        count += 1
-        pygame.draw.rect(screen, BLUE, (pt[0]-margin, pt[1]-margin, 2*margin, 2*margin), 5)
-        print("len:"+repr(len(pts))+" mouse x:"+repr(x)+" y:"+repr(y)+" button:"+repr(button1)+" pressed:"+repr(pressed)+" add pts ...")
-    else:
-        print("len:"+repr(len(pts))+" mouse x:"+repr(x)+" y:"+repr(y)+" button:"+repr(button1)+" pressed:"+repr(pressed))
+                    if draw_mode is not None:
+                        clicks.append(pos)
+                        if len(clicks) == 2:
+                            x0, y0 = clicks[0]
+                            x1, y1 = clicks[1]
+                            if draw_mode == "euclidean":
+                                drawLine_euclidean(x0, y0, x1, y1)
+                            elif draw_mode == "coordinate-free":
+                                drawLine_coord_free(x0, y0, x1, y1)
+                            clicks = []
+                            pygame.display.flip()
 
-    # if len(pts)>1:
-        
-
-    # Go ahead and update the screen with what we've drawn.
-    # This MUST happen after all the other drawing commands.
-    pygame.display.update()
-    old_button1 = button1
-    old_pressed = pressed
+            elif event.button == 3:  # Right click shows menu
+                menu_pos = pygame.mouse.get_pos()
+                show_menu = True
 
 pygame.quit()
+sys.exit()
