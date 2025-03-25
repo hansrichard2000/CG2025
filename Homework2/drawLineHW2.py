@@ -85,9 +85,8 @@ while not done:
     else:
         print("len:"+repr(len(pts))+" mouse x:"+repr(x)+" y:"+repr(y)+" button:"+repr(button1)+" pressed:"+repr(pressed))
 
-    if len(pts)>1:
-        drawPolylines(GREEN, 1)
-        # drawLagrangePolylines(BLUE, 10, 3)
+    # if len(pts)>1:
+        
 
     # Go ahead and update the screen with what we've drawn.
     # This MUST happen after all the other drawing commands.
