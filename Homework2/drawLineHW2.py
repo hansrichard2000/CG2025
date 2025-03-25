@@ -6,13 +6,7 @@ width = 800
 height = 600
 pygame.init()
 screen = pygame.display.set_mode((width, height), 0, 32)
-
-background_image_filename = 'image/curve_pattern.png'
-
-background = pygame.image.load(background_image_filename).convert()
-width, height = background.get_size()
-screen = pygame.display.set_mode((width, height), 0, 32)
-pygame.display.set_caption("ImagePolylineMouseButton")
+pygame.display.set_caption("DrawLine HW 2")
   
 # Define the colors we will use in RGB format
 BLACK = (  0,   0,   0)
@@ -32,20 +26,29 @@ clock= pygame.time.Clock()
 
 
 def drawPoint(pt, color='GREEN', thick=3):
-    # pygame.draw.line(screen, color, pt, pt)
     pygame.draw.circle(screen, color, pt, thick)
 
 #HW2 implement drawLine with drawPoint
-def drawLine(pt0, pt1, color='GREEN', thick=3):
-    drawPoint((100,100), color,  thick)
-    drawPoint(pt0, color, thick)
-    drawPoint(pt1, color, thick)
-
-def drawPolylines(color='GREEN', thick=3):
-    if(count < 2): return
-    for i in range(count-1):
-        drawLine(pts[i], pts[i+1], color)
-        # pygame.draw.line(screen, color, pts[i], pts[i+1], thick)
+def drawLine(x0, y0, x1, y1, color='GREEN', thick=3):
+    """
+    Draws a line from (x0, y0) to (x1, y1) using the drawPoint function.
+    Uses linear interpolation (DDA-like approach).
+    """
+    if x0 == x1:
+        if y0 > y1:
+            y0, y1 = y1, y0
+        for y in range(y0, y1 + 1):
+            x = round(x0 + (x1 - x0) * (y - y0) / (y1 - y0))
+            drawPoint(x0, y, color=color, thick=thick)
+    else:
+        if x0 > x1:
+            x0, y0, x1, y1 = x1, y1, x0, y0
+        
+        slope = (y1 - y0) / (x1 - x0)
+        
+        for x in range(x0, x1 + 1):
+            y = round(y0 + (y1 - y0) * (x - x0) / (x1 - x0))
+            drawPoint(x, round(y), GREEN, thick=thick)
 
 #Loop until the user clicks the close button.
 done = False
