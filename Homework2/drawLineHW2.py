@@ -11,7 +11,7 @@ width = 800
 height = 600
 pygame.init()
 screen = pygame.display.set_mode((width, height))
-pygame.display.set_caption("Line Drawing Method Picker")
+pygame.display.set_caption("Draw Line HW2")
 
 # Fonts and colors
 font = pygame.font.SysFont("Arial", 18)
