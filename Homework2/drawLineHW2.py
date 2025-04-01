@@ -49,7 +49,7 @@ def drawLine_euclidean(x0, y0, x1, y1, color=GREEN, thick=3):
         if y0 > y1:
             y0, y1 = y1, y0
         for y in range(y0, y1 + 1):
-            drawPoint(x0, y, color=color, thick=thick)
+            pygame.draw.line(screen, color, (x0, y0), (x1, y1), thick)
     else:
         if x0 > x1:
             x0, y0, x1, y1 = x1, y1, x0, y0
