@@ -13,3 +13,8 @@ https://github.com/hansrichard2000/CG2025/tree/master/Homework2
 
 ### Youtube Video
 https://youtu.be/bQfLXKV-3Yc
+
+## Homework 3 Quicklink
+https://github.com/hansrichard2000/CG2025/tree/master/Homework3
+### Youtube Video
+https://youtube.com/shorts/aGVNncjmt88?feature=share
