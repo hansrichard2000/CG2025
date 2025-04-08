@@ -20,7 +20,6 @@ https://github.com/hansrichard2000/CG2025/tree/master/Homework3
 ### Youtube Video
 https://youtube.com/shorts/aGVNncjmt88?feature=share
 
-
 ## Homework 4 Quicklink
 https://github.com/hansrichard2000/CG2025/tree/master/Homework4
 
