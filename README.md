@@ -28,7 +28,19 @@ https://github.com/hansrichard2000/CG2025/tree/master/Homework4
 https://youtu.be/-oMeHl8-Uaw
 
 ## Homework 5 Quicklink
-https://github.com/hansrichard2000/CG2025/tree/master/Homework4
+https://github.com/hansrichard2000/CG2025/tree/master/Homework5
 
 ### Youtube Video
 https://youtu.be/t9t8hzRjxCA
+
+## Homework 6 Quicklink
+https://github.com/hansrichard2000/CG2025/tree/master/Homework6
+
+### Youtube Video
+https://youtu.be/DOvJstOEdJ8
+
+## Homework 7 Quicklink
+https://github.com/hansrichard2000/CG2025/tree/master/Homework7
+
+### Youtube Video
+https://youtu.be/4ENr9CbrsPw
